@@ -6,8 +6,7 @@ const Navbar = () => {
         <span className="logo">Booking.com</span>
         <div className="navItems">
           <button className="navButton">Home</button>
-          
-
+          <button className="navButton">Login</button>
         </div>
       </div>
     </div>
