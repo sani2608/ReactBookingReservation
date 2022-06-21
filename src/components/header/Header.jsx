@@ -2,27 +2,49 @@ import {
   faBed,
   faCalendar,
   faCar,
+  faMinus,
   faPerson,
   faPlane,
+  faPlus,
   faTaxi,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { format } from "date-fns";
 import { useState } from "react";
 import { DateRange } from "react-date-range";
 import "react-date-range/dist/styles.css"; // main css file
 import "react-date-range/dist/theme/default.css"; // theme css file
 import "./Header.css";
-const Header = () => {
-  const [state, setState] = useState([
+
+const Header = ({ type }) => {
+  const [date, setDate] = useState([
     {
       startDate: new Date(),
-      endDate: null,
+      endDate: new Date(),
       key: "selection",
     },
   ]);
+
+  const [openDate, setOpenDate] = useState(false);
+  const [openOptions, setOpenOptions] = useState(false);
+  const [options, setOptions] = useState({
+    adult: 1,
+    children: 0,
+    room: 1,
+  });
+
+  const handleOption = (name, operation) => {
+    setOptions((prev) => {
+      return {
+        ...prev,
+        [name]: operation === "i" ? options[name] + 1 : options[name] - 1,
+      };
+    });
+  };
+
   return (
     <div className="header">
-      <div className="headerContainer">
+      <div className={type === 'list' ? "headerContainer listMode " : "headerContainer"}>
         <div className="headerList">
           <div className="headerListItem active">
             <FontAwesomeIcon icon={faBed} />
@@ -46,41 +68,130 @@ const Header = () => {
           </div>
         </div>
         <div className="headerTitle">
-          <h1 className="headerTitle">A lifetime of discounts? It's Genius.</h1>
-          <p className="headerDesc">
-            Get rewarded for your travels – unlock instant savings of 10% or
-            more with a free Lamabooking account
-          </p>
-          <button className="headerBtn">Sign in / Register</button>
-          <div className="headerSearch">
-            <div className="headerSearchItem">
-              <FontAwesomeIcon icon={faBed} className="headerIcon" />
-              <input
-                type="text"
-                placeholder="Where are you going?"
-                className="headerSearchInput"
-              />
-            </div>
+          {type !== "list" && (
+            <>
+              <h1 className="headerTitle">
+                A lifetime of discounts? It's Genius.
+              </h1>
+              <p className="headerDesc">
+                Get rewarded for your travels – unlock instant savings of 10% or
+                more with a free Lamabooking account
+              </p>
+              <button className="headerBtn">Sign in / Register</button>
+              <div className="headerSearch">
+                <div className="headerSearchItem">
+                  <FontAwesomeIcon icon={faBed} className="headerIcon" />
+                  <input
+                    type="text"
+                    placeholder="Where are you going?"
+                    className="headerSearchInput"
+                  />
+                </div>
 
-            <div className="headerSearchItem">
-              <FontAwesomeIcon icon={faCalendar} className="headerIcon" />
-              <DateRange
-                editableDateInputs={true}
-                onChange={(item) => setState([item.selection])}
-                moveRangeOnFirstSelection={false}
-                ranges={state}
-              />
-              <span className="headerSearchText">date to date</span>
-            </div>
+                <div className="headerSearchItem">
+                  <FontAwesomeIcon icon={faCalendar} className="headerIcon" />
+                  {openDate && (
+                    <DateRange
+                      editableDateInputs={true}
+                      onChange={(item) => setDate([item.selection])}
+                      moveRangeOnFirstSelection={false}
+                      ranges={date}
+                      className="date"
+                    />
+                  )}
+                  <span
+                    onClick={() => setOpenDate(!openDate)}
+                    className="headerSearchText"
+                  >{`${format(date[0].startDate, "dd-MMM-yyyy")} to ${format(
+                    date[0].endDate,
+                    "dd-MMM-yyyy"
+                  )}`}</span>
+                </div>
 
-            <div className="headerSearchItem">
-              <FontAwesomeIcon icon={faPerson} className="headerIcon" />
-              <span className="headerSearchText">2 adults 2 children</span>
-            </div>
-            <div className="headerSearchItem">
-              <button className="headerBtn">Search</button>
-            </div>
-          </div>
+                <div className="headerSearchItem">
+                  <FontAwesomeIcon icon={faPerson} className="headerIcon" />
+                  <span
+                    className="headerSearchText"
+                    onClick={() => setOpenOptions(!openOptions)}
+                  >
+                    {`${options.adult} adult . ${options.children} children . ${options.room} room`}
+                  </span>
+                  {openOptions && (
+                    <div className="options">
+                      <div className="optionItem">
+                        <span className="optionText">Adult</span>
+                        <div className="optionCounter">
+                          <button
+                            className="optionCounterButton"
+                            onClick={() => handleOption("adult", "d")}
+                            disabled={options.adult <= 1}
+                          >
+                            <FontAwesomeIcon icon={faMinus} />
+                          </button>
+                          <span className="optionCounterNumber">
+                            {options.adult}
+                          </span>
+                          <button
+                            className="optionCounterButton"
+                            onClick={() => handleOption("adult", "i")}
+                          >
+                            <FontAwesomeIcon icon={faPlus} />
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="optionItem">
+                        <span className="optionText">Children</span>
+                        <div className="optionCounter">
+                          <button
+                            className="optionCounterButton"
+                            onClick={() => handleOption("children", "d")}
+                            disabled={options.children === 0}
+                          >
+                            <FontAwesomeIcon icon={faMinus} />
+                          </button>
+                          <span className="optionCounterNumber">
+                            {options.children}
+                          </span>
+                          <button
+                            className="optionCounterButton"
+                            onClick={() => handleOption("children", "i")}
+                          >
+                            <FontAwesomeIcon icon={faPlus} />
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="optionItem">
+                        <span className="optionText">Room</span>
+                        <div className="optionCounter">
+                          <button
+                            className="optionCounterButton"
+                            onClick={() => handleOption("room", "d")}
+                            disabled={options.room === 1}
+                          >
+                            <FontAwesomeIcon icon={faMinus} />
+                          </button>
+                          <span className="optionCounterNumber">
+                            {options.room}
+                          </span>
+                          <button
+                            className="optionCounterButton"
+                            onClick={() => handleOption("room", "i")}
+                          >
+                            <FontAwesomeIcon icon={faPlus} />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <div className="headerSearchItem">
+                  <button className="headerBtn">Search</button>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>
